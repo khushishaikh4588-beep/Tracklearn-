@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TraceLearn</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:20px;
+  font-family:Arial,sans-serif;
+  background:#101827;color:#f5f7ff;
+}
+.container{max-width:520px;margin:auto}
+.tag{color:#5eead4;font-weight:bold}
+h1{font-size:34px;margin-bottom:8px}
+p{color:#b8c4d9;line-height:1.6}
+.card{
+  background:#1c293b;padding:20px;
+  border:1px solid #35465d;
+  border-radius:18px;margin-top:20px;
+}
+button{
+  width:100%;padding:14px;margin-top:12px;
+  border:1px solid #536780;border-radius:10px;
+  background:#26374d;color:white;
+  font-size:16px;text-align:left;
+}
+button:active{background:#155e75}
+.primary{
+  background:#0f766e;border:0;
+  text-align:center;font-weight:bold;
+}
+.small{font-size:13px;color:#9fb0c8}
+#result{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <p class="tag">LEARN • UNDERSTAND • IMPROVE</p>
+  <h1>TraceLearn</h1>
+  <p>Discover what you know and what to learn next.</p>
+
+  <div class="card" id="quiz">
+    <p class="tag" id="progress">QUESTION 1 OF 3</p>
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <p class="small" id="feedback"></p>
+  </div>
+
+  <div class="card" id="result">
+    <p class="tag">YOUR LEARNING REPORT</p>
+    <h2 id="score"></h2>
+    <h3 id="recommendation"></h3>
+    <p id="reason"></p>
+    <button class="primary" onclick="restart()">Try Again</button>
+  </div>
+  <p class="small">Prototype v1 • Recommendations use transparent quiz rules.</p>
+</div>
+
+<script>
+const questions=[
+ {
+  q:"What is a variable in Python?",
+  a:["A place to store a value","A type of loop","A web browser"],
+  correct:0,concept:"Variables"
+ },
+ {
+  q:"Which symbol assigns a value in Python?",
+  a:["==","=","!="],
+  correct:1,concept:"Assignment"
+ },
+ {
+  q:"What does print('Hello') do?",
+  a:["Stores a number","Displays Hello","Creates a variable"],
+  correct:1,concept:"Output"
+ }
+];
+
+let current=0,score=0,answers=[];
+
+function showQuestion(){
+ document.getElementById("progress").textContent=
+   `QUESTION ${current+1} OF ${questions.length}`;
+ document.getElementById("question").textContent=
+   questions[current].q;
+ document.getElementById("feedback").textContent="";
+ const box=document.getElementById("answers");
+ box.innerHTML="";
+ questions[current].a.forEach((answer,index)=>{
+   const btn=document.createElement("button");
+   btn.textContent=answer;
+   btn.onclick=()=>choose(index);
+   box.appendChild(btn);
+ });
+}
+
+function choose(index){
+ const q=questions[current];
+ const buttons=document.querySelectorAll("#answers button");
+ buttons.forEach(b=>b.disabled=true);
+ answers.push({
+   concept:q.concept,
+   correct:index===q.correct
+ });
+ if(index===q.correct){
+   score++;
+   document.getElementById("feedback").textContent="Correct! Well done.";
+ }else{
+   document.getElementById("feedback").textContent=
+     "Not quite. Correct answer: "+q.a[q.correct];
+ }
+ const next=document.createElement("button");
+ next.className="primary";
+ next.textContent=current===questions.length-1?
+   "See My Report":"Next Question";
+ next.onclick=()=>{
+   current++;
+   if(current<questions.length)showQuestion();
+   else showResult();
+ };
+ document.getElementById("answers").appendChild(next);
+}
+
+function showResult(){
+ document.getElementById("quiz").style.display="none";
+ document.getElementById("result").style.display="block";
+ document.getElementById("score").textContent=
+   `${score} / ${questions.length} correct`;
+ const weak=answers.filter(a=>!a.correct);
+ if(weak.length){
+   const concepts=[...new Set(weak.map(a=>a.concept))];
+   document.getElementById("recommendation").textContent=
+     "Recommended: Review "+concepts.join(", ");
+   document.getElementById("reason").textContent=
+     "You missed questions linked to "+concepts.join(", ")+
+     ". Review these concepts and try the quiz again.";
+ }else{
+   document.getElementById("recommendation").textContent=
+     "Ready for a practice challenge!";
+   document.getElementById("reason").textContent=
+     "You answered every question correctly. Try more Python exercises to strengthen your skills.";
+ }
+}
+
+function restart(){
+ current=0;score=0;answers=[];
+ document.getElementById("result").style.display="none";
+ document.getElementById("quiz").style.display="block";
+ showQuestion();
+}
+showQuestion();
+</script>
+</body>
+</html>
